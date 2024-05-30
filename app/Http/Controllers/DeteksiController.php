@@ -7,14 +7,17 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Session;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Log;
 use App\Models\File;
-use App\Models\uploads;
+use App\Models\Upload;
 use Illuminate\Support\Facades\Http;
+use Exception;
 
 class DeteksiController extends Controller
 {
     public function upload(Request $request){
-        return view("deteksi");
+        return view('deteksi');
+        
     }
 
     public function uploadPOST(Request $request)
@@ -33,7 +36,6 @@ class DeteksiController extends Controller
             $imagePath = $image->storeAs('uploads', $hashedName, 'public',$request->file('image')->getClientOriginalName());
             $imageUrl = Storage::url($imagePath);
 
-        
             // Mengirim request POST ke Flask API
             $response = $client->post('/deteksi', [
                 'multipart' => [
@@ -43,43 +45,62 @@ class DeteksiController extends Controller
                         'filename' => $image->getClientOriginalName(),
                         'headers'  => [
                             'Content-Type' => $image->getClientMimeType()
-                        ]
-                    ]
-                ]
+                            ]
+                            ]
+                            ]
+                            
             ]);
 
-
             // Mendekode response body
-            $responseBody = json_decode($response->getBody()->getContents(), true);
-        
+            // var_dump($response->getBody()->getContents());
+            $responseBody = json_decode($response->getBody()->getContents());
+            
             // Cek status kode response
-            if ($response->getStatusCode() == 200) {
-                //Session::put('imageUrl', $responseBody);
-                $upload = new uploads();
-                $upload->path = $imageUrl;
-                $upload->prediction = $responseBody[0]; // Asumsi response body adalah [predicted_class, prediction_values]
-                $upload->save();
-                Session::put('imageUrl', $upload->path);
-                // return redirect('/deteksi');
-                return redirect()->route('deteksicrud', ['id' => $upload->id]);
-            } else {
-                // Mengarahkan kembali dengan pesan error jika status kode tidak 200
-                return redirect('/deteksi')->with('error', 'Error processing image');
-            }
-        } catch (\Exception $e) {
-            // Menangani exception dan mengarahkan kembali dengan pesan error
-            return redirect('/deteksicrud')->with('error', 'Error: ' . $e->getMessage());
+            $upload = new Upload();
+            $upload->path = $imageUrl;
+            $upload->prediction = json_encode($responseBody);
+            $upload->save();
+            return redirect()->route('deteksicrud', ['id' => $upload->id]);
+            
+        } catch (\Exception) {
+            return redirect()->back()->with('error', 'Upload Gambar Gagal! Coba Ulangi.');
         }
     }
 
 
     public function showdeteksicrud($id)
     {
-        $imageUrl = uploads::find($id);
-        if (!$imageUrl) {
+        $upload = Upload::find($id);
+        
+        if (!$upload) {
             return redirect('/deteksi')->with('error', 'Tidak ada gambar yang diupload');
         }
-        return view('deteksicrud', compact('imageUrl'));
+        
+        $imageUrl = $upload->path;
+        
+        return view('deteksicrud', compact('imageUrl','id'));
     }
-    
+
+    public function processHasilDeteksi($id){
+        return redirect()->route('hasil-deteksi', ['id' => $id]);
+
+    }
+
+    public function hasilDeteksi($id)
+    {
+        $upload = Upload::find($id);
+        
+        if (!$upload) {
+            return redirect('/deteksi')->with('error', 'Tidak ada gambar yang diupload');
+        }
+        
+        $imageUrl = $upload->path;
+        $prediction = json_decode($upload->prediction);
+        $kategori = $prediction->kategori;
+        $akurasi_x = $prediction->prediction_score[0];
+        $akurasi_y = $prediction->prediction_score[1];
+
+        return view('hasildeteksi', compact('imageUrl', 'prediction','id'));    
+    }
+
 }

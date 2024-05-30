@@ -17,7 +17,7 @@
             <form class="flex flex-col pl-28 pr-28 pt-16 pb-16 w-items-center gap-y-2" id="ubahadmin" method="POST" action="{{ route('updateProfile', ['id' => $user->id]) }}">
                 @csrf
                 @method('PUT') 
-                <div class="text-4xl font-bold text-center text-green-400 mb-10">Edit Data</div>
+                <div class="text-4xl font-bold text-center text-green-400 mb-10">Hapus Data</div>
                 @if($errors->any())
                     <div class="bg-red-500 text-white p-3 rounded mb-3">
                         <ul>
@@ -50,7 +50,14 @@
                 <div>
                     <input type="email" name="email" value="{{ $user->email}}" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-black dark:focus:border-black" placeholder="Email" required />
                 </div> 
-                 
+                <div class="relative">
+                    <input name="password"  value="{{ $user->password}}" type="password" name="password"   autocomplete="current-password" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-black dark:focus:border-black"  placeholder="Enter password" >
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer" name="togglePassword">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0zm4.21 3.39A9.955 9.955 0 0121 12c-2-4-6-7-9-7s-7 3-9 7a9.955 9.955 0 011.79 3.39M4.93 4.93l14.14 14.14"></path>
+                        </svg>
+                    </span>
+                </div> 
                 <div>
                     <input type="text" name="role" value="{{ $user->role}}"  class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-black dark:focus:border-black" placeholder="Jabatan" required />
                 </div> 
@@ -63,8 +70,6 @@
                         event.preventDefault();
                     }
                 });
-
-               
             </script>
             
         </div>

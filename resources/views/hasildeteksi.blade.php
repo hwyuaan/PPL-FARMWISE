@@ -6,33 +6,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     @vite('resources/css/app.css')
-    <title>Deteksi Penyakit</title>
+    <title>Hasil Deteksi Penyakit</title>
 </head>
 <body class="">
- <!-- navbar-->
- @include('navbar')
- <!--up-->
- 
+ <div class="navbar fixed">
+    <nav class="bg-slate-50 drop-shadow-md w-screen">
+      <div class="px-9 lg:x-8 ">
+        <div class="relative flex h-16 items-center justify-between">
+          <div class="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+            <div class="flex flex-shrink-1 items-center">
+              <img class="h-14 w-13" src={{ asset('asset/LOGO.png') }}>
+              <p class="judul text-2xl text-gray-500 font-normal" >Farmwise</p>
+            </div>
+          </div>
+          <div class="flex space-y-0 space-x-3.5 items-center">
+            <form action="{{ route('logout') }}" method="POST">
+                @csrf
+                <button type="submit" class="bg-[#2ECC71] text-white hover:text-gray-900 rounded-md px-3 py-2 text-base font-medium">LogOut</button>
+            </form>
+        </div>
+      </div>
+    </nav>
+ </div>
+
  <div class="flex justify-center w-screen h-screen items-center">
    <div class="flex justify-center">
       <label for="dropzone" class="flex justify-center border-2  border-gray-500 rounded-lg bg-red-400 dark:hover:bg-white dark:bg-white hover:bg-white dark:border-green-400 " style="width: 950px; height: 500px;">
         <div class="profil flex flex-row h-full w-full justify-between items-start pt-10 rounded-lg bg-white-500 px-10 relative"> <!-- Menambahkan relative di sini -->
-            <div class="flex flex-col w-auto h-auto bg-white rounded-lg p-2">
+            <div class="flex flex-row gap-12 w-auto h-auto justify-center items-center bg-white rounded-lg p-2">
                 <div class="flex flex-col">
-                    <p>ID PENYAKIT : XXXXXX</p>
-                    <p>xx/xx/xxxx xx:xx:xx</p><br><br><br>
+                    <h1 class="font-medium text-2xl items-center justify-center ">Hasil Deteksi</h1>
+                    <br>
+                    <br>
+                    <img src="{{asset( $imageUrl) }}" style="width: 300px heigh:200px" class="img-preview">
+                </div> 
+                <div class="flex flex-col  mt-20 justify-between items-center  ">
+                    <ul>
+                        
+                        <h2 class="font-medium">ID Gambar: {{ $id }}</h2>
+                        <br>
+                        <h2 class="font-medium">Kategori: {{ $prediction->kategori }}</h2>
+                        <br>
+                        <h2 class="font-medium">Akurasi:</h2>
+                        <li>Akurasi sapi sehat: {{ $prediction->prediction_score[0] }}</li>
+                        <li>Akurasi sapi terdiagnosa penyakit: {{ $prediction->prediction_score[1] }}</li>
+                    </ul>
+                    <div class="flex flex-col h-44 object-bottom ">
+                        <a href="/"><button type="button" class="w-52 h-10 bg-green-400 rounded-lg outline-green-700 outline-1 flex items-center justify-center hover:bg-green-600 active:bg-green-700 focus:outline-none focus:ring focus:ring-green-800">Selesai</button> </a>        
+                    </div>
                 </div>
-                <div class="flex flex-col">
-                    <p>Catagories Penyakit : {{ $prediction['Prediction'] }}</p>
-                </div>
-            </div>
-            <svg class="w-6 h-6 text-gray-800 dark:text-black absolute top-2 right-2 cursor-pointer" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 17.94 6M18 18 6.06 6"/>
-            </svg>
-
-            <div class="w-100 h-52 bg-slate-300 rounded-lg flex justify-center items-center relative p-2">
-                Foto yang sudah diunggah
-            </div>               
         </div>
       </label>
    </div>

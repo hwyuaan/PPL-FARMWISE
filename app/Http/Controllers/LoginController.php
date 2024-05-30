@@ -1,29 +1,12 @@
 <?php
-
-// namespace App\Http\Controllers;
-
-
-// use Illuminate\Http\Request;
-// use Illuminate\Support\Facades\Auth;
-// class LoginController extends Controller
-// {
-//     public function index(){
-//         return view('loginpage');
-//     }
-//     // public function postlogin(Request $request){
-//     //     if(Auth::attempt($request-> only ('email','password'))){
-//     //         return redirect('/home');
-//     //     }
-//     //     return redirect('/');
-//     // }
-// }
-
-
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\User;;
+use Illuminate\Support\Facades\Log;
 use Symfony\Contracts\Service\Attribute\Required;
 
 class LoginController extends Controller
@@ -32,6 +15,41 @@ class LoginController extends Controller
         return view('Login/loginpage');
              
     }
+    
+    public function cek (Request $request){
+        $request-> validate([
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+            
+        
+        $credentials = $request->only('email', 'password');
+        //dd($credentials);
+        // $user = User::where('email', $request->email)->first();
+        if (Auth::attempt($credentials)) {
+            $request->session()->regenerate();
+            $user = User::where('email', $request->email)->first();
+            $username = $user->name;
+            session(['username' => $username]); 
+            if ($user->role == 'admin') {
+                return redirect()->intended('/admin');
+            } 
+            elseif ($user->role == 'pegawai') {
+                return redirect()->intended('/pegawai');} 
+            else {
+                // Redirect ke halaman default atau logout
+                return redirect()->intended('/');
+            }
+        } 
+        else {
+            return back()->withErrors(['loginError' => 'Login Gagal'])->withInput();
+           
+        }
+
+        
+        
+    }
+    
     // public function ajaxLogin(Request $request)
     // {
     //     try {
@@ -51,19 +69,4 @@ class LoginController extends Controller
     //         ]);
     //     }
     // }
-    public function auth(Request $request)
-    {
-        $request->validate([
-            'email' => ["Required","email"],
-            'password' => ["Required"],
-        ]);
-      
-        if (Auth::attempt($request->only('email', 'password'))) {
-            $request->session()->regenerate();
-            return redirect()->intended('/admin/profileadmin');
-        }
-        return back()->with('loginError', 'Login Gagal');
-
-
-    }
 }
